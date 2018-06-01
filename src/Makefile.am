@@ -1,4 +1,4 @@
-DIST_SUBDIRS = secp256k1 univalue
+DIST_SUBDIRS = secp256k1 univalue libtorrent
 
 AM_LDFLAGS = $(PTHREAD_CFLAGS) $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS)
 AM_CXXFLAGS = $(HARDENED_CXXFLAGS)
@@ -10,6 +10,7 @@ DYNAMIC_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BOOST_CPPFLAGS) $(LEVELDB_CPP
 
 DYNAMIC_INCLUDES += -I$(srcdir)/secp256k1/include
 DYNAMIC_INCLUDES += -I$(srcdir)/univalue/include
+DYNAMIC_INCLUDES += -I$(srcdir)/libtorrent/include
 
 LIBDYNAMIC_SERVER=libdynamic_server.a
 LIBDYNAMIC_WALLET=libdynamic_wallet.a
@@ -427,7 +428,8 @@ dynamicd_LDADD = \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
-  $(LIBSECP256K1)
+  $(LIBSECP256K1) \
+  $(LIBTORRENT)
 
 if ENABLE_ZMQ
 dynamicd_LDADD += $(LIBDYNAMIC_ZMQ) $(ZMQ_LIBS)
@@ -474,7 +476,11 @@ dynamic_tx_LDADD = \
   $(LIBSECP256K1)
 
 dynamic_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
-#
+
+# dynamic libtorrent library #
+if EMBEDDED_LIBTORRENT
+include Makefile.libtorrent.include
+endif
 
 # dynamicconsensus library #
 if BUILD_DYNAMIC_LIBS

@@ -257,6 +257,12 @@ AC_ARG_WITH([daemon],
   [build_dynamicd=$withval],
   [build_dynamicd=yes])
 
+AC_ARG_WITH([libtorrent],
+  [AS_HELP_STRING([--with-libtorrent],
+  [build dynamicd libtorrent (default=yes)])],
+  [build_dynamicd=$withval],
+  [build_dynamicd=yes])
+
 use_pkgconfig=yes
 case $host in
   *mingw*)
@@ -608,6 +614,19 @@ AM_CONDITIONAL([EMBEDDED_LEVELDB],[true])
 AC_SUBST(LEVELDB_CPPFLAGS)
 AC_SUBST(LIBLEVELDB)
 AC_SUBST(LIBMEMENV)
+
+AM_CONDITIONAL([LIBTORRENT_ENABLE_DHT], [test "x$ARG_ENABLE_DHT" = "xyes" -o "x$ARG_ENABLE_DHT" = "xlogging" ])
+AM_CONDITIONAL([EMBEDDED_LIBTORRENT],[true])
+AM_CONDITIONAL([LIBTORRENT_DEBUGFLAGS],[false])
+AM_CONDITIONAL([LIBTORRENT_OPENSSL_INCLUDES],[false])
+AM_CONDITIONAL([DBOOST_ASIO_SEPARATE_COMPILATION],[true])
+AC_SUBST(LIBTORRENT)
+AC_SUBST(LIBTORRENT_ENABLE_DHT)
+AC_SUBST(EMBEDDED_LIBTORRENT)
+AC_SUBST(LIBTORRENT_DEBUGFLAGS)
+AC_SUBST(LIBTORRENT_OPENSSL_INCLUDES)
+AC_SUBST(DBOOST_ASIO_SEPARATE_COMPILATION)
+AC_SUBST(LIBTORRENT_CPPFLAGS)
 
 if test x$enable_wallet != xno; then
     dnl Check for libdb_cxx only if wallet enabled
@@ -1008,7 +1027,7 @@ else
 fi
 
 if test x$build_dynamic_utils$build_dynamic_libs$build_dynamicd$dynamic_enable_qt$use_tests = xnonononono; then
-  AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-libs --with-daemon --with-gui or --enable-tests])
+  AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-libs --with-daemon --with-gui or --enable-tests --with-libtorrent])
 fi
 
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])

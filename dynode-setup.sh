@@ -4,7 +4,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[1;36m'
 NC='\033[0m'
 
-PROJECT="dynamic"
+PROJECT="Dynode"
 PROJECT_FOLDER="/root/dynamic"
 
 DAEMON_BINARY="dynamicd"
@@ -29,7 +29,12 @@ function get_shared_key()
 
 function checks() 
 {
-  if [[ $(lsb_release -d) >= *16.04* ]]; then
+  if [[ $(lsb_release --id | cut -f2) != 'ubuntu' ]]; then
+    echo -e "${RED}You are not running Ubuntu.  Installation is cancelled.${NC}"
+    exit 1
+  fi
+  
+  if [[ $(lsb_release --release | cut -f2) >= 16.04 ]]; then
     echo -e "${RED}You are not running Ubuntu 16.04 or above. Installation is cancelled.${NC}"
     exit 1
   fi
@@ -42,18 +47,17 @@ function checks()
 
 function show_header()
 {
+  VERSION=$(sed 's/\..*//' /etc/debian_version)
   clear
-  echo -e "${RED}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${NC}"
+  echo -e "${RED}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${NC}"
   echo -e "${YELLOW}$Dynode Installer ${NC}"
-  echo -e "${RED}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${NC}"
+  echo -e "${RED}■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■${NC}"
   echo
-  echo -e "${BLUE}This script will automate the UPDATE of your ${YELLOW}$PROJECT ${BLUE}dynode along with the server configuration."
+  echo -e  "$Version = {RED}$VERSION${NC}"
+  echo -e "${BLUE}This script will automate the installation and setup of your ${YELLOW}$PROJECT${BLUE}."
   echo -e "It will:"
   echo
   echo -e " ${YELLOW}■${NC} Prepare your system with any missing dependencies"
-  echo -e " ${YELLOW}■${NC} Rebuild the new project from GitHUB in a temp folder"
-  echo -e " ${YELLOW}■${NC} Copy the new binaries to the project folder and remove the temp folder"
-  echo -e " ${YELLOW}■${NC} Modify syntax and naming conventions."
   echo -e " ${YELLOW}■${NC} Check if you have Brute-Force protection. If not install fail2ban."
   echo -e " ${YELLOW}■${NC} Update the system firewall to only allow SSH, the dynode ports and outgoing connections"
   echo -e " ${YELLOW}■${NC} Add or modify the schedule entry for the service to restart automatically on power cycles/reboots."
@@ -126,7 +130,7 @@ function build_project()
   echo
   echo -e "${BLUE}Compiling the wallet (this can take 20 minutes)${NC}"
   sudo ./autogen.sh
-  sudo ./configure
+  sudo ./configure --without-gui --disable-tests
   sudo make
   if [ -f $DAEMON_BINARY_PATH ]; then
     echo -e "${BLUE}$PROJECT_NAME Daemon and CLI installed, proceeding to next step...${NC}"
